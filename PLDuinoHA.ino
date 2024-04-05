@@ -1,14 +1,13 @@
+#include <Arduino_BuiltIn.h>
+
 #include <ArduinoHA.h>
 #include <ArduinoHADefines.h>
 #include <HADevice.h>
 #include <HAMqtt.h>
 
-
 #include <ESP8266WiFi.h>
-#include <PLDuino.h>
-#include "utils.h"
 
-#define LED_PIN         D0
+//#define LED_PIN         D0
 #define BROKER_ADDR     IPAddress(192,168,0,17)
 #define WIFI_SSID       "MyNetwork"
 #define WIFI_PASSWORD   "MyPassword"
@@ -17,24 +16,26 @@ WiFiClient client;
 HADevice device;
 HAMqtt mqtt(client, device);
 
+//// ID setup for MQTT elements like swtich, cover, sensor
+
 // "led" is unique ID of the switch. You should define your own ID.
 HASwitch led("led");
 
 void onSwitchCommand(bool state, HASwitch* sender)
 {
-    digitalWrite(LED_PIN, (state ? HIGH : LOW));
+    //digitalWrite(LED_PIN, (state ? HIGH : LOW));
     sender->setState(state); // report state back to the Home Assistant
 }
 
-
-
 // "myCover" is unique ID of the cover. You should define your own ID.
-HACover cover("myCover", HACover::PositionFeature);
+HACover garageL("LeftGarageDoor", HACover::PositionFeature);
 
 // PositionFeature is optional, however required to be in a "stopped" state other than open or closed.
 // If ommitted, a CommandStop will result in HA treating the cover as either Open or Closed immediately after the command.
 // See https://www.home-assistant.io/integrations/cover.mqtt/
 // Added in https://github.com/dawidchyrzynski/arduino-home-assistant/pull/111
+
+
 
 void onCoverCommand(HACover::CoverCommand cmd, HACover* sender) {
     if (cmd == HACover::CommandOpen) {
@@ -70,8 +71,8 @@ void setup() {
     WiFi.macAddress(mac);
     device.setUniqueId(mac, sizeof(mac));
 
-    pinMode(LED_PIN, OUTPUT);
-    digitalWrite(LED_PIN, LOW);
+    //pinMode(LED_PIN, OUTPUT);
+    //digitalWrite(LED_PIN, LOW);
 
     // connect to wifi
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -93,8 +94,8 @@ void setup() {
     
     
     
-    cover.onCommand(onCoverCommand);
-    cover.setName("My cover"); // optional
+    garageL.onCommand(onCoverCommand);
+    garageL.setName("Left Door"); // optional
 
     // Optionally you can set retain flag for the HA commands
     // cover.setRetain(true);
@@ -105,6 +106,7 @@ void setup() {
 
     mqtt.begin(BROKER_ADDR);
 }
+
 
 void loop() {
 
